@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 15</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans (Headers/UI) & Lora (APA Serif Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --primary: #0f172a;
+            --secondary: #6366f1;
+            --secondary-light: rgba(99, 102, 241, 0.2);
+            --accent: #f43f5e;
+            --warning: #fbbf24;
+            --success: #10b981;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-light: #ffffff;
+            --border: #1e293b;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Lora', Georgia, serif; /* APA 7th Serif Body */
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+        }
+        
+        h1, h2, h3, h4, h5, .sans-serif {
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif; /* Premium Sans-Serif Headers */
+            font-weight: 700;
+        }
+        
+        .slide-container {
+            width: 92%;
+            max-width: 1200px;
+            height: 88vh;
+            background: #0f172a;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: #0f172a;
+            color: var(--text-light);
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header h1 { 
+            margin: 0; 
+            font-size: 1.8rem; 
+            color: var(--text-light);
+            background: linear-gradient(135deg, var(--text-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header .slide-badge {
+            background: var(--secondary-light);
+            color: var(--secondary);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .footer {
+            background: #0f172a;
+            padding: 16px 40px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        /* Layouts */
+        .title-layout { text-align: center; }
+        .title-layout i { font-size: 5.5rem; color: var(--secondary); margin-bottom: 25px; }
+        .title-layout h1 { 
+            font-size: 3.8rem; 
+            line-height: 1.2;
+            color: var(--text-light); 
+            margin-bottom: 15px; 
+            background: linear-gradient(135deg, #ffffff 30%, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .title-layout h2 { 
+            font-size: 1.8rem; 
+            color: var(--text-muted); 
+            font-style: italic; 
+            font-family: 'Lora', serif;
+            font-weight: 400;
+            margin-top: 0;
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        
+        .card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--secondary);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 10px 25px -10px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 35px -10px rgba(99, 102, 241, 0.35);
+            border-color: var(--secondary);
+        }
+        .card i { 
+            font-size: 2.5rem; 
+            color: var(--secondary); 
+            margin-bottom: 20px;
+            filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.3));
+        }
+        .card h3 { margin-top: 0; font-size: 1.3rem; color: var(--text-light); }
+        .card p { font-size: 1.05rem; line-height: 1.7; color: var(--text-main); margin-bottom: 0; }
+        
+        .stat-card { 
+            text-align: center; 
+            padding: 35px 25px; 
+            background: #1e293b; 
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            background: #1e293b;
+            box-shadow: 0 15px 35px -10px rgba(99, 102, 241, 0.25);
+            transform: scale(1.02);
+            border-color: var(--secondary);
+        }
+        .stat-card .number { 
+            font-size: 4.5rem; 
+            font-weight: 800; 
+            color: var(--secondary); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+        .stat-card .label { 
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            color: var(--text-light); 
+            text-transform: uppercase;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .stat-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        
+        ul.styled-list { list-style: none; padding: 0; margin: 0; }
+        ul.styled-list li { 
+            padding: 16px 20px; 
+            background: #1e293b; 
+            margin-bottom: 12px; 
+            border-radius: 12px; 
+            border-left: 5px solid var(--secondary); 
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            font-size: 1.1rem; 
+            line-height: 1.6;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+        ul.styled-list li:hover {
+            transform: translateX(4px);
+            background: #243049;
+            border-color: var(--secondary);
+        }
+        
+        /* Command Flow */
+        .flow-node {
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            border-top: 5px solid var(--secondary);
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 25px -10px rgba(0,0,0,0.3);
+            flex: 1;
+            margin: 0 15px;
+            transition: all 0.3s;
+        }
+        .flow-node:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.25);
+            border-color: var(--secondary);
+        }
+        
+        /* Timelines */
+        .timeline-step {
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            width: 22%;
+            text-align: center;
+            box-shadow: 0 10px 25px -10px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .timeline-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.25);
+            border-color: var(--secondary);
+        }
+
+        /* Theme-safe Callout and Box Elements */
+        .callout {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            color: var(--text-main);
+        }
+        .callout-warning {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .callout-danger {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .callout-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .chart-box {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -10px rgba(0,0,0,0.3);
+        }
+        .visual-box {
+            background: #1e293b;
+            border: 1px dashed var(--border);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1>Preparedness Phase (Before the Flood)</h1>
+            <div class="slide-badge">Slide 15 of 31</div>
+        </div>
+        <div class="content">
+            
+        <div class="grid-2" style="align-items:center;">
+            <div>
+                <ul class="styled-list">
+                    <li><strong>Annual Meetings:</strong> Conduct committee reviews every July.</li>
+                    <li><strong>Alternative Sites:</strong> Map at-risk clinics and designate fallback locations with JPS data.</li>
+                    <li><strong>Stockpiling:</strong> Secure 2-week supply of medicines, PPE, and diesel for generators.</li>
+                    <li><strong>High-Risk Patient Registry:</strong> Update lists for hemodialysis, antenatal, and chronic care patients.</li>
+                </ul>
+            </div>
+            <div class="visual-box" style="padding: 60px;">
+                <i class="fa-solid fa-boxes-stacked" style="font-size:11rem; color:#cbd5e1; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05));"></i>
+            </div>
+        </div>
+        
+        </div>
+        <div class="footer">
+            <span>Occupational and Environmental Health Unit, Kedah State Health Department 2026</span>
+            <span>Source: Garis Panduan Pengurusan Banjir, Edisi 2 (2019)</span>
+        </div>
+    </div>
+    
+<div style="position: absolute; bottom: 15px; right: 25px; font-size: 0.65rem; color: rgba(255,255,255,0.4); z-index: 1000; font-family: 'Plus Jakarta Sans', sans-serif; pointer-events: none;">Source: Garis Panduan Pengurusan Banjir KKM Edisi Ke-2 (2019) & Arahan MKN No. 20</div>
+</body>
+</html>

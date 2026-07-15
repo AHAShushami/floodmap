@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kedah Flood Presentation Dashboard</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-dark: #090d16; 
+            --bg-nav: #0f172a; 
+            --border-color: #1e293b;
+            --text-light: #f8fafc; 
+            --text-muted: #64748b;
+            --accent: #4f46e5; 
+        }
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            background: var(--bg-dark); 
+        }
+        #sidebar { 
+            width: 320px; 
+            background: var(--bg-nav); 
+            color: var(--text-light); 
+            display: flex; 
+            flex-direction: column; 
+            border-right: 1px solid var(--border-color); 
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        #sidebar.collapsed {
+            width: 0;
+            border-right: none;
+        }
+        #sidebar.collapsed > :not(#toggle-btn) {
+            display: none;
+        }
+        #toggle-btn {
+            position: absolute;
+            top: 24px;
+            right: -15px;
+            z-index: 1000;
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s;
+        }
+        #sidebar.collapsed #toggle-btn {
+            right: -45px;
+            background: var(--bg-nav);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            display: flex !important;
+        }
+        #toggle-btn:hover {
+            transform: scale(1.1);
+            background: #6366f1;
+        }
+        .logo-area { 
+            padding: 24px; 
+            border-bottom: 1px solid var(--border-color); 
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .logo-area h2 { 
+            margin: 0; 
+            font-size: 1.15rem; 
+            font-weight: 800;
+            color: #ffffff; 
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+        }
+        .logo-area h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px #10b981;
+        }
+        .logo-area p {
+            margin: 5px 0 0 18px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .nav-links { 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px 0; 
+            flex: 1; 
+            overflow-y: auto; 
+        }
+        /* Custom Scrollbar for Sidebar */
+        .nav-links::-webkit-scrollbar {
+            width: 6px;
+        }
+        .nav-links::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .nav-links::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        .nav-links::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        .nav-item { 
+            padding: 10px 24px; 
+            color: #cbd5e1; 
+            text-decoration: none; 
+            font-size: 0.85rem; 
+            font-weight: 600;
+            border-left: 4px solid transparent; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .nav-item:hover { 
+            background: rgba(255,255,255,0.02); 
+            color: #ffffff; 
+        }
+        .nav-item.active { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.15), transparent); 
+            color: #818cf8; 
+            border-left-color: #4f46e5; 
+        }
+        .slide-num-badge {
+            background: #1e293b;
+            color: var(--text-muted);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 10px;
+            display: inline-block;
+            min-width: 18px;
+            text-align: center;
+        }
+        .nav-item.active .slide-num-badge {
+            background: #4f46e5;
+            color: #ffffff;
+        }
+        .nav-category { 
+            padding: 20px 24px 8px 24px; 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            color: var(--text-muted); 
+            font-weight: 800; 
+            letter-spacing: 1px;
+        }
+        #content-area { 
+            flex: 1; 
+            background: var(--bg-dark); 
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            border-radius: 12px;
+        }
+        #nav-controls {
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+        #nav-controls button {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        #nav-controls button:hover {
+            background: var(--accent);
+            color: white;
+        }
+        #nav-controls button i {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <button id="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="logo-area">
+            <h2>JKN KEDAH</h2>
+            <p>Flood Preparedness 2026</p>
+        </div>
+        <div class="nav-links">
+            <div class="nav-category">Intro & Threat</div><a class="nav-item" onclick="loadPage('slide_01.html', this)">
+        <span class="slide-num-badge">01</span> Flood Disaster Preparedness
+    </a>
+<a class="nav-item" onclick="loadPage('slide_02.html', this)">
+        <span class="slide-num-badge">02</span> Presentation Objectives
+    </a>
+<a class="nav-item" onclick="loadPage('slide_03.html', this)">
+        <span class="slide-num-badge">03</span> Historical Overview: A Recurring Crisis
+    </a>
+<a class="nav-item" onclick="loadPage('slide_04.html', this)">
+        <span class="slide-num-badge">04</span> High-Risk Districts & Hotspots
+    </a>
+<a class="nav-item" onclick="loadPage('slide_05.html', this)">
+        <span class="slide-num-badge">05</span> Evacuee Escalation (2021–2024)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_06.html', this)">
+        <span class="slide-num-badge">06</span> Issues in Flood Management (Lessons Identified)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_07.html', this)">
+        <span class="slide-num-badge">07</span> Health Facility Vulnerability
+    </a>
+<div class="nav-category" style="margin-top:20px;">Management Framework</div><a class="nav-item" onclick="loadPage('slide_08.html', this)">
+        <span class="slide-num-badge">08</span> National Disaster Management Framework
+    </a>
+<a class="nav-item" onclick="loadPage('slide_09.html', this)">
+        <span class="slide-num-badge">09</span> KKM 5-Level Disaster Committee Structure
+    </a>
+<a class="nav-item" onclick="loadPage('slide_10.html', this)">
+        <span class="slide-num-badge">10</span> CPRC Negeri (Level II Activation)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_11.html', this)">
+        <span class="slide-num-badge">11</span> Pejabat Kesihatan Daerah (Level I Activation)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_12.html', this)">
+        <span class="slide-num-badge">12</span> Chain of Command & Information Flow
+    </a>
+<a class="nav-item" onclick="loadPage('slide_13.html', this)">
+        <span class="slide-num-badge">13</span> Field Operations: RAT vs RRT
+    </a>
+<div class="nav-category" style="margin-top:20px;">4-Phase Operations</div><a class="nav-item" onclick="loadPage('slide_14.html', this)">
+        <span class="slide-num-badge">14</span> 4-Phase Disaster Management Cycle
+    </a>
+<a class="nav-item" onclick="loadPage('slide_15.html', this)">
+        <span class="slide-num-badge">15</span> Preparedness Phase (Before the Flood)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_16.html', this)">
+        <span class="slide-num-badge">16</span> Response Phase (During the Flood)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_17.html', this)">
+        <span class="slide-num-badge">17</span> Recovery Phase Priorities
+    </a>
+<a class="nav-item" onclick="loadPage('slide_18.html', this)">
+        <span class="slide-num-badge">18</span> Klinik Kesihatan Specific Protocols
+    </a>
+<a class="nav-item" onclick="loadPage('slide_19.html', this)">
+        <span class="slide-num-badge">19</span> Hospital Flood Management
+    </a>
+<div class="nav-category" style="margin-top:20px;">Post-Flood Risks</div><a class="nav-item" onclick="loadPage('slide_20.html', this)">
+        <span class="slide-num-badge">20</span> Post-Flood Disease Surveillance
+    </a>
+<a class="nav-item" onclick="loadPage('slide_21.html', this)">
+        <span class="slide-num-badge">21</span> Mental Health & Psychosocial Support (MHPSS)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_22.html', this)">
+        <span class="slide-num-badge">22</span> Key Takeaways (Executive Summary)
+    </a>
+<div class="nav-category" style="margin-top:20px;">Geospatial Analysis</div><a class="nav-item" onclick="loadPage('slide_23.html', this)">
+        <span class="slide-num-badge">23</span> Geospatial Analysis: Facilities vs Hotspots
+    </a>
+<a class="nav-item" onclick="loadPage('slide_24.html', this)">
+        <span class="slide-num-badge">24</span> Distance to Alternative Clinics
+    </a>
+<a class="nav-item" onclick="loadPage('slide_25.html', this)">
+        <span class="slide-num-badge">25</span> Road Access Risk (Logistics)
+    </a>
+<a class="nav-item" onclick="loadPage('slide_26.html', this)">
+        <span class="slide-num-badge">26</span> 22 Verified At-Risk Facilities
+    </a>
+<a class="nav-item" onclick="loadPage('slide_27.html', this)">
+        <span class="slide-num-badge">27</span> Recommendations for Resilience
+    </a>
+<a class="nav-item" onclick="loadPage('slide_28.html', this)">
+        <span class="slide-num-badge">28</span> Interactive Geospatial Map Integration
+    </a>
+<a class="nav-item" onclick="loadPage('slide_29.html', this)">
+        <span class="slide-num-badge">29</span> Radius Impact Breakdown
+    </a>
+<div class="nav-category" style="margin-top:20px;">Borang Reten MTL 25-26</div><a class="nav-item" onclick="loadPage('slide_30.html', this)">
+        <span class="slide-num-badge">30</span> Borang Reten MTL 25-26 Reporting Framework
+    </a>
+<a class="nav-item" onclick="loadPage('slide_31.html', this)">
+        <span class="slide-num-badge">31</span> Borang Reten MTL 25-26 Operations Dashboard
+    </a>
+
+            <div class="nav-category" style="margin-top:20px;">Live Tools</div>
+            <a class="nav-item" style="color:#10b981; font-weight:700;" onclick="loadPage('Flood_Risk_Map.html', this)">
+                <span class="slide-num-badge" style="background:rgba(16,185,129,0.1); color:#10b981;">GIS</span> Interactive Risk Map
+            </a>
+            <a class="nav-item" style="color:#38bdf8; font-weight:700;" onclick="loadPage('Alternative_Clinics.html', this)">
+                <span class="slide-num-badge" style="background:rgba(56,189,248,0.1); color:#38bdf8;">DIST</span> Alternative Clinics
+            </a>
+            <a class="nav-item" style="color:#818cf8; font-weight:700;" onclick="loadPage('Organizational_Hierarchy.html', this)">
+                <span class="slide-num-badge" style="background:rgba(129,140,248,0.1); color:#818cf8;">ORG</span> Committee Structure
+            </a>
+            <a class="nav-item" style="color:#a855f7; font-weight:700;" onclick="loadPage('Communication_Flow.html', this)">
+                <span class="slide-num-badge" style="background:rgba(168,85,247,0.1); color:#a855f7;">FLOW</span> Reporting Flowchart
+            </a>
+        </div>
+    </div>
+    <div id="content-area">
+        <iframe id="main-frame" src="slide_01.html"></iframe>
+        <div id="nav-controls">
+            <button onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+            <button onclick="goHome()"><i class="fa-solid fa-house"></i> Home</button>
+            <button onclick="nextSlide()">Next <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <script>
+        let currentSlideIndex = 1;
+        const totalSlides = 31;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const btn = document.getElementById('toggle-btn');
+            const icon = btn.querySelector('i');
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fa-solid fa-chevron-right';
+            } else {
+                icon.className = 'fa-solid fa-chevron-left';
+            }
+        }
+        function loadPage(url, el) {
+            document.getElementById('main-frame').src = url;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (el) {
+                el.classList.add('active');
+                const match = url.match(/slide_(\d+)\.html/);
+                if (match) {
+                    currentSlideIndex = parseInt(match[1]);
+                }
+            } else {
+                const items = document.querySelectorAll('.nav-links .nav-item');
+                items.forEach(item => {
+                    const clickAttr = item.getAttribute('onclick');
+                    if (clickAttr && clickAttr.includes(url)) {
+                        item.classList.add('active');
+                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                });
+            }
+        }
+        function prevSlide() {
+            if (currentSlideIndex > 1) {
+                currentSlideIndex--;
+                const pad = String(currentSlideIndex).padStart(2, '0');
+                loadPage(`slide_${pad}.html`);
+            }
+        }
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides) {
+                currentSlideIndex++;
+                const pad = String(currentSlideIndex).padStart(2, '0');
+                loadPage(`slide_${pad}.html`);
+            }
+        }
+        function goHome() {
+            currentSlideIndex = 1;
+            loadPage('slide_01.html');
+        }
+        // Set first item active
+        document.querySelector('.nav-item').classList.add('active');
+    </script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Communication & Reporting Flow</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Lora -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <!-- Mermaid JS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --primary: #0f172a;
+            --secondary: #6366f1;
+            --secondary-light: rgba(99, 102, 241, 0.15);
+            --accent: #f43f5e;
+            --warning: #fbbf24;
+            --success: #10b981;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-light: #ffffff;
+            --border: #1e293b;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Lora', Georgia, serif;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        h1, h2, h3, h4, h5, .sans-serif {
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            background: linear-gradient(135deg, var(--text-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--warning);
+            margin-bottom: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 35px;
+            line-height: 1.7;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-top: 40px;
+            margin-bottom: 16px;
+            border-left: 5px solid var(--secondary);
+            padding-left: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Interactive Chart Box */
+        .chart-box {
+            position: relative;
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin: 20px 0 35px 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            cursor: zoom-in;
+            transition: border-color 0.25s ease;
+        }
+
+        .chart-box:hover {
+            border-color: var(--secondary);
+        }
+
+        .chart-overlay-hint {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .chart-box:hover .chart-overlay-hint {
+            opacity: 1;
+        }
+
+        .mermaid {
+            width: 100%;
+            max-width: 900px;
+            background: transparent;
+        }
+
+        /* Rules list cards */
+        .rules-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .rule-card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--secondary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .rule-card h4 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rule-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .rule-card li {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .rule-card li strong {
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Lightbox Container */
+        #zoom-lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 15, 25, 0.96);
+            z-index: 9999;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #zoom-lightbox.active {
+            display: flex;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 2.2rem;
+            cursor: pointer;
+            z-index: 10000;
+            transition: color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+        }
+
+        .close-btn:hover {
+            color: var(--accent);
+        }
+
+        .lightbox-header {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .lightbox-header h3 {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, var(--text-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lightbox-header p {
+            margin: 4px 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .lightbox-viewport {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            cursor: grab;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        .lightbox-viewport:active {
+            cursor: grabbing;
+        }
+
+        .lightbox-content {
+            transform-origin: center center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.04s ease-out;
+        }
+
+        /* Floating Zoom Controls in Lightbox */
+        .lightbox-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+        }
+
+        .lightbox-controls button {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .lightbox-controls button:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Mermaid Graph inside Lightbox overrides */
+        .lightbox-content svg {
+            width: 1200px !important;
+            height: auto !important;
+            max-width: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Communication and Reporting Flow (Field to National)</h1>
+        <div class="subtitle"><i class="fa-solid fa-route"></i> Reporting Flow · GP Pengurusan Banjir Edisi 2 2019</div>
+        
+        <p class="description">Operational data is collected daily from the field, verified, consolidated at the district and state levels, and transmitted up the chain of command to the national headquarters and NADMA.</p>
+
+        <!-- Flowchart of Communication -->
+        <h2><i class="fa-solid fa-diagram-next"></i> Information Flow Chart</h2>
+        <div class="chart-box" id="chart-flow-box" onclick="openLightbox('chart-flow', 'Communication & Reporting Flow')">
+            <div class="chart-overlay-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to Zoom & Pan</div>
+            <div class="mermaid" id="chart-flow">
+                graph TD
+                    %% Styling
+                    classDef field fill:#1e293b,stroke:#0ea5e9,stroke-width:1px,color:#f1f5f9;
+                    classDef unit fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#f1f5f9;
+                    classDef districtNode fill:#1e293b,stroke:#fbbf24,stroke-width:2px,color:#f1f5f9;
+                    classDef stateNode fill:#1e293b,stroke:#818cf8,stroke-width:2px,color:#f1f5f9;
+                    classDef natNode fill:#1e1b4b,stroke:#f43f5e,stroke-width:2px,color:#f1f5f9;
+
+                    subgraph "1. FIELD LEVEL (Data Collection & Operations)"
+                        KD["Klinik Desa (KD)<br>• Local situation assessments<br>• Asset damage tracking"]:::field
+                        KK["Klinik Kesihatan (KK)<br>• Primary healthcare delivery<br>• Referral coordination"]:::field
+                        PPS["Pusat Pemindahan Sementara (PPS)<br>• Disease surveillance (Borang 6/7)<br>• Water safety (Borang 11)<br>• Food safety (Borang 13)<br>• MHPSS (Borang 14)"]:::field
+                        Mob["RRT / RAT / MHPSS Teams<br>• Mobile medical checks<br>• Environmental inspections"]:::field
+                    end
+
+                    subgraph "2. DISTRICT LEVEL (Consolidation & Verification)"
+                        Hosp_Ger["Bilik Gerakan Hospital Daerah<br>• Tracks admissions (Borang 12)<br>• Tracks staff status (Borang 15)"]:::unit
+                        PKPD_Ger["Bilik Gerakan PKPD (Pergigian)<br>• Tracks dental staff status (Borang 15)"]:::unit
+                        PKD_Ger["Bilik Gerakan Banjir PKD<br>• Verifies Borang 3, 4, 5, 6, 7, 8, 11, 13, 14, 15<br>• Consolidates district status"]:::unit
+                        PKOB_Daerah["PKOB Daerah (District PKOB)<br>• District disaster control center<br>• Coordinates all district agencies"]:::districtNode
+                    end
+
+                    subgraph "3. STATE LEVEL (Analysis & Requisition)"
+                        JKN_CPRC["Bilik Gerakan / CPRC JKN Kedah<br>• Aggregates all state reports<br>• Conducts epidemiological analysis"]:::stateNode
+                        JPBBN["JPBBN / PKOB Negeri<br>• Coordinates state-level logistics<br>• Inter-agency coordination (APM, JPS, TNB)"]:::stateNode
+                    end
+
+                    subgraph "4. NATIONAL LEVEL (Policy & Risk Communication)"
+                        KKM_CPRC["CPRC Kebangsaan KKM<br>• Consolidates reports from all JKNs<br>• Reports to Director General of Health"]:::natNode
+                        NADMA["NADMA / NDCC<br>• National command coordination<br>• Inter-ministerial briefings"]:::natNode
+                    end
+
+                    %% Flow lines
+                    KD -->|Daily Reten| PKD_Ger
+                    KK -->|Daily Reten| PKD_Ger
+                    PPS -->|Surveillance Reten| PKD_Ger
+                    Mob -->|Field Activity Reports| PKD_Ger
+                    Hosp_Ger -->|"Daily Hospital Reten (Borang 12 & 15)"| PKD_Ger
+                    PKPD_Ger -->|"Daily Dental Staff Status (Borang 15)"| PKD_Ger
+                    
+                    PKD_Ger -->|Consolidated District Reten| JKN_CPRC
+                    PKD_Ger -->|"Feeds Health Data &<br>Verifies Other Agency Info"| PKOB_Daerah
+                    
+                    JKN_CPRC -->|State Health Updates| JPBBN
+                    JKN_CPRC -->|"State Consolidated Report<br>(12:00 PM & 5:00 PM Daily)"| KKM_CPRC
+                    
+                    KKM_CPRC -->|National Situation Report| NADMA
+            </div>
+        </div>
+
+        <!-- Section 3 -->
+        <h2><i class="fa-solid fa-list-check"></i> 3. Communication Rules & Milestones</h2>
+        <div class="rules-container">
+            <!-- Rule 1 -->
+            <div class="rule-card" style="border-left-color: var(--secondary);">
+                <h4><i class="fa-solid fa-clipboard-check" style="color: var(--secondary);"></i> 1. Field, Hospital & Dental (PKPD) to District (PKD)</h4>
+                <ul>
+                    <li>Medical teams, public health officers, and water safety inspectors collect raw data directly at clinics and evacuation centers (PPS) using standard Borang Reten templates.</li>
+                    <li>The <strong>Bilik Gerakan Hospital Daerah</strong> compiles admission (Borang 12) and hospital staff status (Borang 15) metrics and submits them to the <strong>PKD Bilik Gerakan</strong>.</li>
+                    <li>The <strong>Bilik Gerakan PKPD (Pergigian)</strong> compiles dental staff status and attendance metrics (Borang 15) and submits them to the <strong>PKD Bilik Gerakan</strong>.</li>
+                    <li>All raw field, hospital, and dental data is consolidated at the district level by PKD.</li>
+                </ul>
+            </div>
+
+            <!-- Rule 2 -->
+            <div class="rule-card" style="border-left-color: var(--warning);">
+                <h4><i class="fa-solid fa-building-user" style="color: var(--warning);"></i> 2. District Coordination & Verification</h4>
+                <ul>
+                    <li>The PKD verifies the correctness of all figures (ensuring zero discrepancies between disease counts, PPS numbers, and clinical admissions).</li>
+                    <li>The PKD sits as a committee member in the <strong>PKOB Daerah</strong> (District Disaster Operations Control Center), where they feed validated health data and help verify coordinate reports from other field agencies (e.g. APM, Polis, JPS).</li>
+                    <li>Consolidated district health files are sent from PKD Bilik Gerakan to the <strong>CPRC JKN Kedah</strong> by <strong>10:00 AM and 3:00 PM</strong> to allow for state-wide analysis.</li>
+                </ul>
+            </div>
+
+            <!-- Rule 3 -->
+            <div class="rule-card" style="border-left-color: var(--success);">
+                <h4><i class="fa-solid fa-share-nodes" style="color: var(--success);"></i> 3. State to National (KKM)</h4>
+                <ul>
+                    <li>The CPRC JKN Kedah aggregates data across all affected districts.</li>
+                    <li>Under the authorization of the State Health Director, the consolidated reports are sent to <strong>CPRC Kebangsaan KKM</strong> by <strong>12:00 PM and 5:00 PM daily</strong>.</li>
+                </ul>
+            </div>
+
+            <!-- Rule 4 -->
+            <div class="rule-card" style="border-left-color: var(--accent);">
+                <h4><i class="fa-solid fa-bullhorn" style="color: var(--accent);"></i> 4. Risk Communication</h4>
+                <ul>
+                    <li>All press statements, media releases, and public health warnings must be coordinated through the <strong>Unit Komunikasi Korporat KKM</strong> and approved by the Pengerusi JKN (State Health Director) or Ketua Pengarah Kesihatan (DG of Health) to avoid conflicting information.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            Sources: Garis Panduan Pengurusan Banjir KKM Edisi Ke-2 (2019) & Arahan MKN No. 20<br>
+            Occupational and Environmental Health Unit, Kedah State Health Department 2026
+        </div>
+    </div>
+
+    <!-- Zoom Lightbox Modal -->
+    <div id="zoom-lightbox">
+        <button class="close-btn" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="lightbox-header">
+            <h3 id="lightbox-title">Chart Title</h3>
+            <p><i class="fa-solid fa-mouse"></i> Scroll wheel to zoom · <i class="fa-solid fa-hand"></i> Click & drag to pan</p>
+        </div>
+        <div class="lightbox-viewport" id="lightbox-viewport">
+            <div class="lightbox-content" id="lightbox-content">
+                <!-- Cloned SVG content will be injected here -->
+            </div>
+        </div>
+        <div class="lightbox-controls">
+            <button onclick="zoomLightbox(0.15)" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="resetLightboxZoom()" title="Reset (100%)"><i class="fa-solid fa-arrows-to-eye"></i></button>
+            <button onclick="zoomLightbox(-0.15)" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+        </div>
+    </div>
+
+    <!-- Initialize Mermaid -->
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            },
+            themeVariables: {
+                fontFamily: '"Plus Jakarta Sans", sans-serif',
+                fontSize: '13px'
+            }
+        });
+
+        // Lightbox Zoom & Pan Logic
+        let lbScale = 0.85;
+        let lbPointX = 0;
+        let lbPointY = 0;
+        let lbIsDragging = false;
+        let lbStart = { x: 0, y: 0 };
+        
+        const lightbox = document.getElementById('zoom-lightbox');
+        const lbContent = document.getElementById('lightbox-content');
+        const lbViewport = document.getElementById('lightbox-viewport');
+        const lbTitle = document.getElementById('lightbox-title');
+
+        function openLightbox(chartId, titleText) {
+            const sourceMermaid = document.querySelector('#' + chartId + ' svg');
+            if (!sourceMermaid) return;
+            
+            const svgClone = sourceMermaid.cloneNode(true);
+            lbContent.innerHTML = '';
+            lbContent.appendChild(svgClone);
+            
+            lbTitle.textContent = titleText;
+            lbScale = 0.85;
+            lbPointX = 0;
+            lbPointY = 0;
+            updateLightboxTransform();
+            
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Stop background scrolling
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            lbContent.innerHTML = '';
+            document.body.style.overflow = ''; // Re-enable background scrolling
+        }
+
+        function updateLightboxTransform() {
+            lbContent.style.transform = `translate(${lbPointX}px, ${lbPointY}px) scale(${lbScale})`;
+        }
+
+        function zoomLightbox(factor) {
+            lbScale = Math.max(0.15, Math.min(4.0, lbScale + factor));
+            updateLightboxTransform();
+        }
+
+        function resetLightboxZoom() {
+            lbScale = 0.85;
+            lbPointX = 0;
+            lbPointY = 0;
+            updateLightboxTransform();
+        }
+
+        // Mouse Drag to Pan
+        lbViewport.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.lightbox-controls') || e.target.closest('.close-btn')) return;
+            lbIsDragging = true;
+            lbStart = { x: e.clientX - lbPointX, y: e.clientY - lbPointY };
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!lbIsDragging) return;
+            lbPointX = e.clientX - lbStart.x;
+            lbPointY = e.clientY - lbStart.y;
+            updateLightboxTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            lbIsDragging = false;
+        });
+
+        // Mouse Wheel Zoom (Scroll to zoom, focused on cursor location)
+        lbViewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const rect = lbViewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const xs = (mouseX - lbPointX) / lbScale;
+            const ys = (mouseY - lbPointY) / lbScale;
+
+            const delta = -e.deltaY;
+            const zoomStep = 0.08;
+            if (delta > 0) {
+                lbScale = Math.min(4.0, lbScale + zoomStep);
+            } else {
+                lbScale = Math.max(0.15, lbScale - zoomStep);
+            }
+
+            lbPointX = mouseX - xs * lbScale;
+            lbPointY = mouseY - ys * lbScale;
+
+            updateLightboxTransform();
+        });
+
+        // Esc key to close lightbox
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+    </script>
+</body>
+</html>

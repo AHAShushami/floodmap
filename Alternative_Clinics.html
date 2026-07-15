@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance to Alternative Clinics</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Lora -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --primary: #0f172a;
+            --secondary: #6366f1;
+            --secondary-light: rgba(99, 102, 241, 0.15);
+            --accent: #f43f5e;
+            --warning: #fbbf24;
+            --success: #10b981;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-light: #ffffff;
+            --border: #1e293b;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Lora', Georgia, serif;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, h5, .sans-serif {
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+            font-weight: 700;
+        }
+
+        /* Top Header Control Panel */
+        #header-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            padding: 16px 28px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        #header-panel h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--text-light);
+            background: linear-gradient(135deg, var(--text-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #header-panel p {
+            margin: 4px 0 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Floating Zoom Controls */
+        #zoom-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        #zoom-controls button {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        #zoom-controls button:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Viewport and Zoom Container */
+        #zoom-viewport {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #zoom-content {
+            width: 1400px;
+            padding: 120px 40px 60px 40px;
+            transform-origin: center center;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Content Layout elements */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        
+        .card {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--secondary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
+            border-color: var(--secondary);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 0;
+        }
+
+        ul.styled-list { list-style: none; padding: 0; margin: 0; }
+        ul.styled-list li { 
+            padding: 12px 16px; 
+            background: #1e293b; 
+            margin-bottom: 8px; 
+            border-radius: 10px; 
+            border-left: 4px solid var(--secondary); 
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem; 
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .callout {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warning);
+            padding: 16px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+        
+        .badge-danger {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Panel -->
+    <div id="header-panel">
+        <div>
+            <h1>Distance to Alternative Clinics</h1>
+            <p>Geospatial Contingency & Alternative Routing Analysis · JKN Kedah 2025</p>
+        </div>
+        <div style="display: flex; gap: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; color: var(--text-muted);">
+            <div><i class="fa-solid fa-mouse"></i> Scroll wheel to zoom</div>
+            <div>|</div>
+            <div><i class="fa-solid fa-hand"></i> Click & drag to pan</div>
+        </div>
+    </div>
+
+    <!-- Zoom controls -->
+    <div id="zoom-controls">
+        <button onclick="zoomIn()" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+        <button onclick="resetZoom()" title="Reset (100%)"><i class="fa-solid fa-arrows-to-eye"></i></button>
+        <button onclick="zoomOut()" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+    </div>
+
+    <!-- Viewport -->
+    <div id="zoom-viewport">
+        <div id="zoom-content">
+            
+            <!-- Section 1: Risk Assessment Cards -->
+            <div>
+                <h2 class="sans-serif" style="font-size: 1.5rem; color: var(--text-light); margin-bottom: 20px; border-left: 5px solid var(--accent); padding-left: 15px;"><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent);"></i> Alternative Clinic Distance Risk</h2>
+                <div class="grid-3">
+                    <!-- Critical Risk -->
+                    <div class="card" style="border-top-color: var(--accent);">
+                        <div>
+                            <h3><i class="fa-solid fa-circle-exclamation" style="color:var(--accent);"></i> CRITICAL RISK</h3>
+                            <p style="margin-top: 15px; margin-bottom: 15px;"><strong>KD Terap &rarr; KK Kota Kuala Muda (43.9km)</strong></p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">This represents the longest routing distance in the registry. Road access is compromise-prone during Kuala Muda floods, risking complete isolation. Pre-stocking emergency packages is highly recommended.</p>
+                        </div>
+                    </div>
+                    <!-- High Risk -->
+                    <div class="card" style="border-top-color: var(--warning);">
+                        <div>
+                            <h3><i class="fa-solid fa-circle-xmark" style="color:var(--warning);"></i> HIGH RISK</h3>
+                            <p style="margin-top: 15px; margin-bottom: 15px;"><strong>KD Bukit Meriam &rarr; KK Bedong (20.1km)</strong></p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Significant distance for emergency ambulance response during major flood events. Delayed transfers present clinical safety issues for acute evacuations from the Bukit Meriam sub-district.</p>
+                        </div>
+                    </div>
+                    <!-- Coverage Gap -->
+                    <div class="card" style="border-top-color: #8b5cf6;">
+                        <div>
+                            <h3 style="color:#a78bfa;"><i class="fa-solid fa-network-wired" style="color:#8b5cf6;"></i> COVERAGE GAP</h3>
+                            <p style="margin-top: 15px; margin-bottom: 15px;"><strong>Unprotected Facilities</strong></p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Several critical facilities in the state registry currently lack any officially designated alternative clinics. No pre-planned contingency routing exists, causing acute vulnerability during evacuations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Details on Unprotected Facilities -->
+            <div class="grid-2">
+                <div>
+                    <h2 class="sans-serif" style="font-size: 1.5rem; color: var(--text-light); margin-bottom: 20px; border-left: 5px solid var(--secondary); padding-left: 15px;"><i class="fa-solid fa-circle-minus"></i> Unprotected Facilities Registry</h2>
+                    <ul class="styled-list">
+                        <li style="border-left-color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>KKIA Jitra</strong> (Kubang Pasu)</span>
+                            <span class="badge-danger">No Alternative</span>
+                        </li>
+                        <li style="border-left-color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>KK Kepala Batas</strong> (Kota Setar)</span>
+                            <span class="badge-danger">No Alternative</span>
+                        </li>
+                        <li style="border-left-color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>KK Alor Mengkudu</strong> (Kota Setar)</span>
+                            <span class="badge-danger">No Alternative</span>
+                        </li>
+                        <li style="border-left-color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>KD Tanjung Dawai</strong> (Kuala Muda)</span>
+                            <span class="badge-danger">No Alternative</span>
+                        </li>
+                        <li style="border-left-color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>KD Kg Raja</strong> (Kuala Muda)</span>
+                            <span class="badge-danger">No Alternative</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h2 class="sans-serif" style="font-size: 1.5rem; color: var(--text-light); margin-bottom: 20px; border-left: 5px solid var(--success); padding-left: 15px;"><i class="fa-solid fa-shield-halved"></i> Actionable Mitigation Measures</h2>
+                    <div class="callout" style="border-left-color: var(--success); margin-bottom: 15px;">
+                        <strong>1. Assign Backup Sites:</strong> Formally designate fallback locations for all 5 unprotected clinics before the October monsoon period to establish operational continuity.
+                    </div>
+                    <div class="callout" style="border-left-color: var(--secondary); margin-bottom: 15px;">
+                        <strong>2. Pre-position Medical Stockpiles:</strong> Establish a dedicated 2-week supply of pharmaceuticals and PPE at Kuala Muda alternative clinics to buffer the 43.9km transit gap if roads are cut.
+                    </div>
+                    <div class="callout" style="border-left-color: var(--warning);">
+                        <strong>3. Early Staff Pre-deployment:</strong> Deploy clinical and health teams to designated alternatives *before* flood waters sever local roads to ensure service remains uninterrupted.
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); font-family: 'Plus Jakarta Sans', sans-serif; margin-top: 10px;">
+                Occupational and Environmental Health Unit, Kedah State Health Department 2026
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Zoom Script -->
+    <script>
+        let scale = 1;
+        let pointX = 0;
+        let pointY = 0;
+        let start = { x: 0, y: 0 };
+        let isDragging = false;
+        const zoomContainer = document.getElementById("zoom-content");
+
+        function updateTransform() {
+            zoomContainer.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+        }
+
+        function zoomIn() {
+            scale = Math.min(scale + 0.15, 3.0);
+            updateTransform();
+        }
+
+        function zoomOut() {
+            scale = Math.max(scale - 0.15, 0.4);
+            updateTransform();
+        }
+
+        function resetZoom() {
+            scale = 1;
+            pointX = 0;
+            pointY = 0;
+            updateTransform();
+        }
+
+        // Drag to pan
+        const viewport = document.getElementById("zoom-viewport");
+        viewport.addEventListener("mousedown", (e) => {
+            if (e.target.closest("button") || e.target.closest("a") || e.target.closest("li")) return;
+            isDragging = true;
+            start = { x: e.clientX - pointX, y: e.clientY - pointY };
+            viewport.style.cursor = "grabbing";
+        });
+
+        viewport.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            pointX = e.clientX - start.x;
+            pointY = e.clientY - start.y;
+            updateTransform();
+        });
+
+        viewport.addEventListener("mouseup", () => {
+            isDragging = false;
+            viewport.style.cursor = "grab";
+        });
+
+        viewport.addEventListener("mouseleave", () => {
+            isDragging = false;
+            viewport.style.cursor = "grab";
+        });
+
+        // Wheel zoom
+        viewport.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            const xs = (e.clientX - pointX) / scale;
+            const ys = (e.clientY - pointY) / scale;
+            const delta = -e.deltaY;
+            if (delta > 0) {
+                scale = Math.min(scale + 0.08, 3.0);
+            } else {
+                scale = Math.max(scale - 0.08, 0.4);
+            }
+            pointX = e.clientX - xs * scale;
+            pointY = e.clientY - ys * scale;
+            updateTransform();
+        });
+
+        // Set initial cursor
+        viewport.style.cursor = "grab";
+    </script>
+</body>
+</html>
